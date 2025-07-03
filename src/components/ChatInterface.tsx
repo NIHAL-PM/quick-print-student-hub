@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Send, FileText, Image, Printer, CheckCircle } from 'lucide-react';
+import { Send, FileText, Image, Printer, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -23,7 +23,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! Send me a PDF or image file and I\'ll help you print it. Cost is ₹5 per page.',
+      text: 'Hello! 👋 Send me a PDF or image file and I\'ll help you print it instantly. Cost is just ₹5 per page. Let\'s get started!',
       sender: 'bot',
       timestamp: new Date(),
     }
@@ -46,8 +46,7 @@ const ChatInterface = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Simulate file processing
-    const pages = Math.floor(Math.random() * 10) + 1; // Random page count for demo
+    const pages = Math.floor(Math.random() * 10) + 1;
     const cost = pages * 5;
 
     const fileInfo = {
@@ -57,12 +56,11 @@ const ChatInterface = () => {
       pages,
     };
 
-    addMessage(`Uploaded: ${file.name}`, 'user', fileInfo);
+    addMessage(`📎 Uploaded: ${file.name}`, 'user', fileInfo);
 
-    // Bot response
     setTimeout(() => {
       addMessage(
-        `File processed! 📄 Pages: ${pages} | 💰 Cost: ₹${cost}\n\nReply "confirm" to proceed with payment.`,
+        `✨ File processed successfully!\n\n📄 **${file.name}**\n📊 Pages: ${pages}\n💰 Total Cost: ₹${cost}\n\n💳 Reply "confirm" to proceed with secure payment, or "cancel" to abort.`,
         'bot'
       );
     }, 1000);
@@ -76,16 +74,22 @@ const ChatInterface = () => {
     
     if (userMessage === 'confirm') {
       setTimeout(() => {
-        addMessage('Payment link generated! Complete payment to start printing.', 'bot');
-        toast.success('Payment link sent!');
+        addMessage('🔐 Secure payment link generated!\n\n💳 Complete your payment to start printing.\n📱 UPI, Cards, and Net Banking accepted.\n\n⚡ Your print job will start immediately after payment confirmation.', 'bot');
+        toast.success('Payment link sent to your WhatsApp!', {
+          description: 'Complete payment to start printing'
+        });
       }, 500);
     } else if (userMessage === 'status') {
       setTimeout(() => {
-        addMessage('Your print job is in queue. Position: #3. Estimated time: 5 minutes.', 'bot');
+        addMessage('📋 **Your Print Status**\n\n🎯 Position in queue: #3\n⏱️ Estimated wait time: 5 minutes\n📍 Printer location: Library Ground Floor\n\n🔔 You\'ll get notified when printing starts!', 'bot');
+      }, 500);
+    } else if (userMessage === 'cancel') {
+      setTimeout(() => {
+        addMessage('❌ Print job cancelled successfully.\n\n💡 Feel free to upload another file anytime!\n🤝 I\'m here to help with all your printing needs.', 'bot');
       }, 500);
     } else {
       setTimeout(() => {
-        addMessage('I can help you with printing. Upload a file or type "status" to check your print queue.', 'bot');
+        addMessage('🤖 I\'m your smart printing assistant!\n\n📤 **Upload a file** to get started\n📊 **Type "status"** to check your queue position\n💰 **Type "confirm"** to proceed with payment\n❌ **Type "cancel"** to abort current job\n\n✨ Let\'s make printing effortless!', 'bot');
       }, 500);
     }
 
@@ -97,32 +101,41 @@ const ChatInterface = () => {
   };
 
   return (
-    <Card className="h-96 flex flex-col">
-      <div className="p-4 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-        <h3 className="font-semibold flex items-center gap-2">
-          <Printer className="w-5 h-5" />
-          College Print Bot
-        </h3>
-        <p className="text-sm opacity-90">Online • Ready to print</p>
+    <Card className="h-[500px] flex flex-col border-0 shadow-2xl bg-white/90 backdrop-blur-sm overflow-hidden">
+      <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg">AutoPrint Assistant</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <p className="text-sm text-blue-100">Online • Ready to print</p>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-lg ${
                 message.sender === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white'
+                  : 'bg-white text-gray-800 border border-gray-100'
               }`}
             >
-              <p className="text-sm whitespace-pre-line">{message.text}</p>
+              <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
               {message.file && (
-                <div className="mt-2 p-2 bg-white/20 rounded border">
-                  <div className="flex items-center gap-2 text-xs">
+                <div className={`mt-3 p-3 rounded-xl border-2 border-dashed ${
+                  message.sender === 'user' ? 'border-white/30 bg-white/10' : 'border-gray-200 bg-gray-50'
+                }`}>
+                  <div className="flex items-center gap-2 text-xs font-medium">
                     {message.file.type.startsWith('image/') ? (
                       <Image className="w-4 h-4" />
                     ) : (
@@ -130,13 +143,13 @@ const ChatInterface = () => {
                     )}
                     <span>{message.file.name}</span>
                   </div>
-                  <div className="text-xs mt-1 opacity-80">
+                  <div className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/80' : 'text-gray-600'}`}>
                     {formatFileSize(message.file.size)}
-                    {message.file.pages && ` • ${message.file.pages} pages`}
+                    {message.file.pages && ` • ${message.file.pages} pages • ₹${message.file.pages * 5}`}
                   </div>
                 </div>
               )}
-              <p className="text-xs opacity-70 mt-1">
+              <p className={`text-xs mt-2 ${message.sender === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
                 {message.timestamp.toLocaleTimeString()}
               </p>
             </div>
@@ -144,25 +157,29 @@ const ChatInterface = () => {
         ))}
       </div>
       
-      <div className="p-4 border-t">
-        <div className="flex gap-2">
+      <div className="p-4 bg-white border-t border-gray-100">
+        <div className="flex gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
-            className="shrink-0"
+            className="shrink-0 h-12 w-12 rounded-2xl border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
           >
             📎
           </Button>
           <Input
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type a message..."
+            placeholder="Type your message..."
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            className="flex-1"
+            className="flex-1 h-12 rounded-2xl border-2 border-gray-200 focus:border-blue-400 px-4 text-base"
           />
-          <Button onClick={handleSendMessage} size="sm">
-            <Send className="w-4 h-4" />
+          <Button 
+            onClick={handleSendMessage} 
+            size="sm"
+            className="h-12 w-12 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
+          >
+            <Send className="w-5 h-5" />
           </Button>
         </div>
         <input

@@ -10,7 +10,10 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  Target,
+  Activity
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -22,59 +25,68 @@ const Dashboard = () => {
     revenue: 1875,
     totalPages: 375,
     avgWaitTime: 4.2,
+    successRate: 96.8,
   };
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Jobs Today</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-blue-700">Total Jobs Today</CardTitle>
+            <div className="w-8 h-8 bg-blue-500 rounded-xl flex items-center justify-center">
+              <FileText className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{todayStats.totalJobs}</div>
-            <p className="text-xs text-muted-foreground">
-              <TrendingUp className="inline w-3 h-3 mr-1" />
-              +12% from yesterday
-            </p>
+            <div className="text-3xl font-bold text-blue-900">{todayStats.totalJobs}</div>
+            <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">
+              <TrendingUp className="w-3 h-3" />
+              <span>+12% from yesterday</span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-green-50 to-emerald-100 hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-green-700">Revenue</CardTitle>
+            <div className="w-8 h-8 bg-green-500 rounded-xl flex items-center justify-center">
+              <IndianRupee className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{todayStats.revenue}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold text-green-900">₹{todayStats.revenue}</div>
+            <p className="text-xs text-green-600 mt-1">
               {todayStats.totalPages} pages printed
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-100 hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Wait Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-amber-700">Avg Wait Time</CardTitle>
+            <div className="w-8 h-8 bg-amber-500 rounded-xl flex items-center justify-center">
+              <Clock className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{todayStats.avgWaitTime} min</div>
-            <p className="text-xs text-muted-foreground">
-              -2.1 min from last week
+            <div className="text-3xl font-bold text-amber-900">{todayStats.avgWaitTime}m</div>
+            <p className="text-xs text-amber-600 mt-1">
+              -2.1 min improvement
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-indigo-100 hover:shadow-2xl transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-purple-700">Success Rate</CardTitle>
+            <div className="w-8 h-8 bg-purple-500 rounded-xl flex items-center justify-center">
+              <Target className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">96.8%</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold text-purple-900">{todayStats.successRate}%</div>
+            <p className="text-xs text-purple-600 mt-1">
               {todayStats.completed}/{todayStats.totalJobs} completed
             </p>
           </CardContent>
@@ -82,62 +94,97 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Printer Status</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Activity className="w-6 h-6 text-blue-600" />
+              Printer Status
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Printer className="w-5 h-5 text-green-500" />
+              <div className="flex items-center justify-between p-4 border-2 border-green-200 bg-green-50 rounded-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center">
+                    <Printer className="w-6 h-6 text-white" />
+                  </div>
                   <div>
-                    <div className="font-medium">HP LaserJet Pro - Main</div>
+                    <div className="font-bold text-gray-900">HP LaserJet Pro - Main</div>
                     <div className="text-sm text-gray-600">Paper: 85% • Toner: 45%</div>
                   </div>
                 </div>
-                <Badge className="bg-green-100 text-green-800">Online</Badge>
+                <Badge className="bg-green-100 text-green-700 border-green-300 px-3 py-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  Online
+                </Badge>
               </div>
               
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Printer className="w-5 h-5 text-yellow-500" />
+              <div className="flex items-center justify-between p-4 border-2 border-amber-200 bg-amber-50 rounded-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center">
+                    <Printer className="w-6 h-6 text-white" />
+                  </div>
                   <div>
-                    <div className="font-medium">Canon PIXMA - Backup</div>
+                    <div className="font-bold text-gray-900">Canon PIXMA - Backup</div>
                     <div className="text-sm text-gray-600">Paper: 20% • Ink: 75%</div>
                   </div>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">Low Paper</Badge>
+                <Badge className="bg-amber-100 text-amber-700 border-amber-300 px-3 py-1">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Low Paper
+                </Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Zap className="w-6 h-6 text-blue-600" />
+              Recent Activity
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Assignment_Physics.pdf printed for Arjun M.</span>
-                <span className="text-gray-500 ml-auto">2 min ago</span>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-3 bg-green-50 rounded-xl border border-green-200">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Assignment_Physics.pdf completed</p>
+                  <p className="text-xs text-gray-600">Arjun M. • 2 minutes ago</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Printer className="w-4 h-4 text-blue-500" />
-                <span>Lab_Report.pdf started printing for Kavya R.</span>
-                <span className="text-gray-500 ml-auto">5 min ago</span>
+              
+              <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <Printer className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Lab_Report.pdf started printing</p>
+                  <p className="text-xs text-gray-600">Kavya R. • 5 minutes ago</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <IndianRupee className="w-4 h-4 text-green-500" />
-                <span>Payment received ₹35 from Rohit S.</span>
-                <span className="text-gray-500 ml-auto">8 min ago</span>
+              
+              <div className="flex items-center gap-4 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                  <IndianRupee className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Payment received ₹35</p>
+                  <p className="text-xs text-gray-600">Rohit S. • 8 minutes ago</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <AlertCircle className="w-4 h-4 text-yellow-500" />
-                <span>Low paper warning - Main printer</span>
-                <span className="text-gray-500 ml-auto">15 min ago</span>
+              
+              <div className="flex items-center gap-4 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                  <AlertCircle className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Low paper warning</p>
+                  <p className="text-xs text-gray-600">Main printer • 15 minutes ago</p>
+                </div>
               </div>
             </div>
           </CardContent>
