@@ -13,7 +13,7 @@ import {
   Smartphone,
   Zap,
   Shield,
-  Clock24
+  Clock
 } from 'lucide-react';
 
 const Index = () => {
@@ -78,7 +78,7 @@ const Index = () => {
             
             <Card className="text-center">
               <CardContent className="pt-6">
-                <Clock24 className="w-12 h-12 mx-auto mb-3 text-purple-500" />
+                <Clock className="w-12 h-12 mx-auto mb-3 text-purple-500" />
                 <h3 className="font-semibold mb-2">24/7 Available</h3>
                 <p className="text-sm text-gray-600">Print anytime, collect anytime</p>
               </CardContent>
