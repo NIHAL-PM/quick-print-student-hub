@@ -8,29 +8,30 @@ const router = express.Router();
 // Get all print jobs
 router.get('/jobs', async (req, res) => {
   try {
-    const db = req.app.locals.databaseService as DatabaseService;
-    const jobs = await db.getAllPrintJobs();
+    const databaseService = req.app.locals.databaseService as DatabaseService;
+    const jobs = await databaseService.getAllPrintJobs();
     res.json({ success: true, jobs });
   } catch (error) {
-    console.error('Error fetching print jobs:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch print jobs' });
+    console.error('Failed to get print jobs:', error);
+    res.status(500).json({ success: false, error: 'Failed to retrieve print jobs' });
   }
 });
 
 // Get print job by ID
 router.get('/jobs/:id', async (req, res) => {
   try {
-    const db = req.app.locals.databaseService as DatabaseService;
-    const job = await db.getPrintJob(req.params.id);
+    const { id } = req.params;
+    const databaseService = req.app.locals.databaseService as DatabaseService;
+    const job = await databaseService.getPrintJob(id);
     
     if (!job) {
-      return res.status(404).json({ success: false, error: 'Job not found' });
+      return res.status(404).json({ success: false, error: 'Print job not found' });
     }
     
     res.json({ success: true, job });
   } catch (error) {
-    console.error('Error fetching print job:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch print job' });
+    console.error('Failed to get print job:', error);
+    res.status(500).json({ success: false, error: 'Failed to retrieve print job' });
   }
 });
 
@@ -54,50 +55,87 @@ router.post('/jobs', async (req, res) => {
     if (!studentName || !phoneNumber || !fileName || !fileUrl || !pages || !cost) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing required fields' 
+        error: 'Missing required fields: studentName, phoneNumber, fileName, fileUrl, pages, cost' 
       });
     }
 
-    const jobId = `job_${Date.now()}`;
-    const estimatedTime = Math.max(2, Math.ceil(pages / 10)); // Estimate 2-5 minutes
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const estimatedTime = Math.ceil(pages * 1.2); // 1.2 minutes per page
 
-    const job = {
+    const printJob = {
       id: jobId,
       studentName,
       phoneNumber,
       fileName,
       fileUrl,
-      pages,
-      cost,
+      pages: parseInt(pages),
+      cost: parseFloat(cost),
       status: 'pending' as const,
       paymentStatus: 'pending' as const,
       estimatedTime,
       progress: 0
     };
 
-    const db = req.app.locals.databaseService as DatabaseService;
-    await db.createPrintJob(job);
+    const databaseService = req.app.locals.databaseService as DatabaseService;
+    const wsService = req.app.locals.wsService;
 
-    res.json({ success: true, jobId, job });
+    // Save to database
+    await databaseService.createPrintJob(printJob);
+
+    // Broadcast new job to WebSocket clients
+    if (wsService) {
+      wsService.broadcast('newJob', printJob);
+    }
+
+    res.json({ success: true, jobId, job: printJob });
   } catch (error) {
-    console.error('Error creating print job:', error);
+    console.error('Failed to create print job:', error);
     res.status(500).json({ success: false, error: 'Failed to create print job' });
   }
 });
 
 // Update print job status
-router.patch('/jobs/:id/status', async (req, res) => {
+router.patch('/jobs/:id', async (req, res) => {
   try {
-    const { status, progress } = req.body;
+    const { id } = req.params;
+    const { status, progress, paymentStatus, transactionId } = req.body;
     
-    const db = req.app.locals.databaseService as DatabaseService;
-    await db.updatePrintJob(req.params.id, { status, progress });
-    
-    const updatedJob = await db.getPrintJob(req.params.id);
+    const databaseService = req.app.locals.databaseService as DatabaseService;
+    const wsService = req.app.locals.wsService;
+    const queueService = req.app.locals.queueService as QueueService;
+
+    // Validate job exists
+    const existingJob = await databaseService.getPrintJob(id);
+    if (!existingJob) {
+      return res.status(404).json({ success: false, error: 'Print job not found' });
+    }
+
+    // Update job
+    const updates: any = {};
+    if (status) updates.status = status;
+    if (progress !== undefined) updates.progress = progress;
+    if (paymentStatus) updates.paymentStatus = paymentStatus;
+    if (transactionId) updates.transactionId = transactionId;
+
+    await databaseService.updatePrintJob(id, updates);
+
+    // If payment confirmed, add to print queue
+    if (paymentStatus === 'paid' && existingJob.status === 'pending') {
+      await queueService.addPrintJob(id);
+    }
+
+    // Get updated job
+    const updatedJob = await databaseService.getPrintJob(id);
+
+    // Broadcast update
+    if (wsService) {
+      wsService.broadcast('jobUpdate', updatedJob);
+    }
+
     res.json({ success: true, job: updatedJob });
   } catch (error) {
-    console.error('Error updating job status:', error);
-    res.status(500).json({ success: false, error: 'Failed to update job status' });
+    console.error('Failed to update print job:', error);
+    res.status(500).json({ success: false, error: 'Failed to update print job' });
   }
 });
 

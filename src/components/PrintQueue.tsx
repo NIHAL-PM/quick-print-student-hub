@@ -1,61 +1,87 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Clock, FileText, User, CheckCircle, Printer, AlertCircle, Zap, TrendingUp } from 'lucide-react';
-
-interface PrintJob {
-  id: string;
-  studentName: string;
-  fileName: string;
-  pages: number;
-  cost: number;
-  status: 'pending' | 'printing' | 'completed';
-  estimatedTime: number;
-  progress?: number;
-}
+import { Clock, FileText, User, CheckCircle, Printer, TrendingUp, Zap } from 'lucide-react';
+import { apiService, PrintJob } from '@/lib/apiService';
 
 const PrintQueue = () => {
-  const printJobs: PrintJob[] = [
-    {
-      id: '1',
-      studentName: 'Rahul Kumar',
-      fileName: 'Assignment_Physics.pdf',
-      pages: 5,
-      cost: 25,
-      status: 'printing',
-      estimatedTime: 2,
-      progress: 65,
-    },
-    {
-      id: '2',
-      studentName: 'Priya Singh',
-      fileName: 'Project_Report.pdf',
-      pages: 12,
-      cost: 60,
-      status: 'pending',
-      estimatedTime: 5,
-    },
-    {
-      id: '3',
-      studentName: 'Amit Sharma',
-      fileName: 'Notes_Chapter3.pdf',
-      pages: 8,
-      cost: 40,
-      status: 'pending',
-      estimatedTime: 8,
-    },
-    {
-      id: '4',
-      studentName: 'Sneha Patel',
-      fileName: 'Lab_Manual.pdf',
-      pages: 3,
-      cost: 15,
-      status: 'completed',
-      estimatedTime: 0,
-    },
-  ];
+  const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadPrintJobs();
+    
+    // Set up WebSocket listeners
+    const handleNewJob = (job: PrintJob) => {
+      setPrintJobs(prev => [...prev, job]);
+    };
+
+    const handleJobUpdate = (job: PrintJob) => {
+      setPrintJobs(prev => prev.map(j => j.id === job.id ? job : j));
+    };
+
+    const handleJobCompleted = (jobId: string) => {
+      setPrintJobs(prev => prev.filter(j => j.id !== jobId));
+    };
+
+    apiService.on('newJob', handleNewJob);
+    apiService.on('jobUpdate', handleJobUpdate);
+    apiService.on('jobCompleted', handleJobCompleted);
+
+    return () => {
+      apiService.off('newJob', handleNewJob);
+      apiService.off('jobUpdate', handleJobUpdate);
+      apiService.off('jobCompleted', handleJobCompleted);
+    };
+  }, []);
+
+  const loadPrintJobs = async () => {
+    try {
+      setLoading(true);
+      const jobs = await apiService.getAllPrintJobs();
+      setPrintJobs(jobs.filter(job => job.status !== 'completed'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load print jobs');
+      console.error('Error loading print jobs:', err);
+      // Fallback to demo data if API fails
+      setPrintJobs([
+        {
+          id: '1',
+          studentName: 'Rahul Kumar',
+          phoneNumber: '+919876543210',
+          fileName: 'Assignment_Physics.pdf',
+          fileUrl: '/uploads/assignment.pdf',
+          pages: 5,
+          cost: 25,
+          status: 'printing',
+          paymentStatus: 'paid',
+          estimatedTime: 2,
+          progress: 65,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          studentName: 'Priya Singh',
+          phoneNumber: '+919876543211',
+          fileName: 'Project_Report.pdf',
+          fileUrl: '/uploads/report.pdf',
+          pages: 12,
+          cost: 60,
+          status: 'pending',
+          paymentStatus: 'paid',
+          estimatedTime: 5,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -74,6 +100,10 @@ const PrintQueue = () => {
         return <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-medium">Printing</Badge>;
       case 'completed':
         return <Badge className="bg-green-100 text-green-700 border-green-200 font-medium">Completed</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-100 text-red-700 border-red-200 font-medium">Failed</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-gray-100 text-gray-700 border-gray-200 font-medium">Cancelled</Badge>;
       default:
         return <Badge className="bg-amber-100 text-amber-700 border-amber-200 font-medium">Pending</Badge>;
     }
